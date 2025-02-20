@@ -253,8 +253,8 @@ Autoscale = $Autoscale
     Extends = nodearraybase
     MachineType = $lowMachineType
     ImageName = $lowImageName
-    MaxCount = $MaxAlowExecuteNodeCount
-    Azure.MaxScalesetSize = $HPCMaxScalesetSize
+    MaxCount = $MaxLOWExecuteNodeCount
+    Azure.MaxScalesetSize = $HPClowScalesetSize
     AdditionalClusterInitSpecs = $HPCClusterInitSpecs
     EnableNodeHealthChecks = $EnableNodeHealthChecks
 
@@ -401,6 +401,14 @@ Order = 10
         Config.IntegerOnly = true
 
         [[[parameter HPCMaxScalesetSize]]]
+        Label = Max VMs per VMSS
+        Description = The maximum number of VMs created per VM Scaleset e.g. switch in Slurm.
+        DefaultValue = 100
+        Config.Plugin = pico.form.NumberTextBox
+        Config.MinValue = 1
+        Config.IntegerOnly = true
+
+        [[[parameter HPClowScalesetSize]]]
         Label = Max VMs per VMSS
         Description = The maximum number of VMs created per VM Scaleset e.g. switch in Slurm.
         DefaultValue = 100
