@@ -228,6 +228,8 @@ Autoscale = $Autoscale
         slurm.partition = htc
         # set pcpu = false for all hyperthreaded VMs
         slurm.use_pcpu = false
+    
+
 
     [[nodearray gpu]]
     Extends = nodearraybase
@@ -245,6 +247,23 @@ Autoscale = $Autoscale
         slurm.default_partition = true
         slurm.hpc = true
         slurm.partition = gpu
+
+    #low partition
+    [[nodearray low]]
+    Extends = nodearraybase
+    MachineType = $lowMachineType
+    ImageName = $lowImageName
+    MaxCount = $MaxlowExecuteNodeCount
+    Azure.MaxScalesetSize = $HPCMaxScalesetSize
+    AdditionalClusterInitSpecs = $HPCClusterInitSpecs
+    EnableNodeHealthChecks = $EnableNodeHealthChecks
+
+
+        [[[configuration]]]
+        slurm.default_partition = true
+        slurm.hpc = true
+        slurm.partition = low
+    
 
     [[nodearray dynamic]]
     Extends = nodearraybase
@@ -318,6 +337,12 @@ Order = 10
         ParameterType = Cloud.MachineType
         DefaultValue = Standard_NC24rs_v3
 
+        [[[parameter lowMachineType]]]
+        Label = Low VM Type
+        Description = The VM type for Low execute nodes
+        ParameterType = Cloud.MachineType
+        DefaultValue = Standard_F2s_v2
+
         [[[parameter DynamicMachineType]]]
         Label = Dyn VM Type
         Description = The VM type for Dynamic execute nodes
@@ -354,6 +379,14 @@ Order = 10
         [[[parameter MaxGPUExecuteNodeCount]]]
         Label = Max GPU Nodes
         Description = The total number of GPU execute nodes to start
+        DefaultValue = 8
+        Config.Plugin = pico.form.NumberTextBox
+        Config.MinValue = 1
+        Config.IntegerOnly = true
+
+        [[[parameter MaxGPUExecuteNodeCount]]]
+        Label = Max low Nodes
+        Description = The total number of low execute nodes to start
         DefaultValue = 8
         Config.Plugin = pico.form.NumberTextBox
         Config.MinValue = 1
@@ -849,6 +882,13 @@ Order = 20
         DefaultValue = almalinux8
         Config.Filter := Package in {"cycle.image.ubuntu20", "cycle.image.ubuntu22", "cycle.image.sles15-hpc", "almalinux8"}
 
+        [[[parameter lowImageName]]]
+        Label = GPU OS
+        ParameterType = Cloud.Image
+        Config.OS = linux
+        DefaultValue = almalinux8
+        Config.Filter := Package in {"cycle.image.centos7", "cycle.image.ubuntu20", "cycle.image.ubuntu22", "cycle.image.sles15-hpc", "almalinux8"}
+
         [[[parameter DynamicImageName]]]
         Label = Dynamic OS
         ParameterType = Cloud.Image
@@ -884,6 +924,12 @@ Order = 20
         Label = GPU Cluster-Init
         DefaultValue = =undefined
         Description = Cluster init specs to apply to GPU execute nodes
+        ParameterType = Cloud.ClusterInitSpecs
+
+        [[[parameter lowClusterInitSpecs]]]
+        Label = low Cluster-Init
+        DefaultValue = =undefined
+        Description = Cluster init specs to apply to low execute nodes
         ParameterType = Cloud.ClusterInitSpecs
 
         [[[parameter DynamicClusterInitSpecs]]]
