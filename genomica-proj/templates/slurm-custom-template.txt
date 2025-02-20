@@ -254,7 +254,7 @@ Autoscale = $Autoscale
     MachineType = $lowMachineType
     ImageName = $lowImageName
     MaxCount = $MaxLOWExecuteNodeCount
-    Azure.MaxScalesetSize = $HPClowScalesetSize
+    Azure.MaxScalesetSize = $LowMaxScalesetSize
     AdditionalClusterInitSpecs = $HPCClusterInitSpecs
     EnableNodeHealthChecks = $EnableNodeHealthChecks
 
@@ -408,7 +408,7 @@ Order = 10
         Config.MinValue = 1
         Config.IntegerOnly = true
 
-        [[[parameter HPClowScalesetSize]]]
+        [[[parameter LowMaxScalesetSize]]]
         Label = Max VMs per VMSS
         Description = The maximum number of VMs created per VM Scaleset e.g. switch in Slurm.
         DefaultValue = 100
