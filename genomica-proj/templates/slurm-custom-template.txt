@@ -384,7 +384,7 @@ Order = 10
         Config.MinValue = 1
         Config.IntegerOnly = true
 
-        [[[parameter MaxGPUExecuteNodeCount]]]
+        [[[parameter MaxLOWExecuteNodeCount]]]
         Label = Max low Nodes
         Description = The total number of low execute nodes to start
         DefaultValue = 8
