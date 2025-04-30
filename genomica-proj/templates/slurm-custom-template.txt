@@ -28,8 +28,8 @@ Autoscale = $Autoscale
 
         [[[configuration]]]
 
-        slurm.install_pkg = azure-slurm-install-pkg-3.0.7.tar.gz
-        slurm.autoscale_pkg = azure-slurm-pkg-3.0.7.tar.gz
+        slurm.install_pkg = azure-slurm-install-pkg-3.0.11.tar.gz
+        slurm.autoscale_pkg = azure-slurm-pkg-3.0.11.tar.gz
 
         slurm.version = $configuration_slurm_version
         slurm.accounting.enabled = $configuration_slurm_accounting_enabled
@@ -125,7 +125,7 @@ Autoscale = $Autoscale
         slurm.secondary_scheduler_name = ${ifThenElse(configuration_slurm_ha_enabled, "scheduler-ha-1", undefined)}
 
 
-        [[[cluster-init cyclecloud/slurm:scheduler:3.0.7]]]
+        [[[cluster-init cyclecloud/slurm:scheduler:3.0.11]]]
 
         [[[network-interface eth0]]]
         AssociatePublicIpAddress = $UsePublicNetwork
@@ -190,7 +190,7 @@ Autoscale = $Autoscale
         #itv
         PrivateIp = "10.20.3.62"
 
-        [[[cluster-init cyclecloud/slurm:login:3.0.7]]]
+        [[[cluster-init cyclecloud/slurm:login:3.0.11]]]
         [[[configuration]]]
         autoscale.enabled = false
         slurm.node_prefix = ${ifThenElse(NodeNamePrefix=="Cluster Prefix", StrJoin("-", ClusterName, ""), NodeNamePrefix)}
@@ -204,7 +204,7 @@ Autoscale = $Autoscale
         slurm.node_prefix = ${ifThenElse(NodeNamePrefix=="Cluster Prefix", StrJoin("-", ClusterName, ""), NodeNamePrefix)}
         slurm.use_nodename_as_hostname = $NodeNameIsHostname
 
-        [[[cluster-init cyclecloud/slurm:execute:3.0.7]]]
+        [[[cluster-init cyclecloud/slurm:execute:3.0.11]]]
 
         [[[network-interface eth0]]]
         AssociatePublicIpAddress = $ExecuteNodesPublic
