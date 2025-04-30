@@ -1,9 +1,10 @@
 #!/bin/bash
 
 project_folder_name="genomica-proj"
+mkdir $project_folder_name
 # check locker name:
 #cyclecloud locker list
-locker_name="GBB HPC-storage"
+locker_name="ME-MngEnvMCAP976211-hevargas-3-storage"
 
 echo "Uploading project $project_folder_name to locker $locker_name"
 
