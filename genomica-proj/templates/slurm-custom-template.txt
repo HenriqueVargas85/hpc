@@ -190,7 +190,7 @@ Autoscale = $Autoscale
         #itv
         #PrivateIp = "10.20.250.133"
         #PrivateIp = "10.20.3.60"
-        PrivateIp = "10.20.3.58"
+        PrivateIp = "10.4.4.50"
 
         [[[cluster-init cyclecloud/slurm:login:3.0.11]]]
         [[[configuration]]]
