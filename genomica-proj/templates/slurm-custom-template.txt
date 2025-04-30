@@ -1,10 +1,9 @@
-
 ################################
 ## Cluster Configuration File ##
 ################################
 
 
-[cluster Slurm-Genoma-ITV-v2]
+[cluster Slurm-Genoma-ITV]
 FormLayout = selectionpanel
 IconUrl = https://raw.githubusercontent.com/marcusgaspar/azurehpc/892f729a1450dfec6436d68251ae71752d2a4542/apps/wrf/images/logo-genoma.jpeg
 Category = Schedulers
@@ -13,12 +12,12 @@ Autoscale = $Autoscale
 
     [[node defaults]]
     UsePublicNetwork = $UsePublicNetwork
-    Credentials = $Credentials    
+    Credentials = $Credentials
     SubnetId = $SubnetId
     Region = $Region
     KeyPairLocation = ~/.ssh/cyclecloud.pem
     Azure.Identities = $ManagedIdentity
-    
+
     # Slurm autoscaling supports both Terminate and Deallocate shutdown policies
     ShutdownPolicy = $configuration_slurm_shutdown_policy
 
@@ -28,8 +27,8 @@ Autoscale = $Autoscale
 
         [[[configuration]]]
 
-        slurm.install_pkg = azure-slurm-install-pkg-3.0.11.tar.gz
-        slurm.autoscale_pkg = azure-slurm-pkg-3.0.11.tar.gz
+        slurm.install_pkg = azure-slurm-install-pkg-3.0.7.tar.gz
+        slurm.autoscale_pkg = azure-slurm-pkg-3.0.7.tar.gz
 
         slurm.version = $configuration_slurm_version
         slurm.accounting.enabled = $configuration_slurm_accounting_enabled
@@ -57,14 +56,14 @@ Autoscale = $Autoscale
         cyclecloud.exports.shared.disabled = true
         cyclecloud.exports.sched.samba.enabled = false
         cyclecloud.exports.shared.samba.enabled = false
-        cyclecloud.exports.defaults.samba.enabled = false      
+        cyclecloud.exports.defaults.samba.enabled = false
         cshared.server.legacy_links_disabled = true
 
         # May be used to identify the ID in cluster-init scripts
         cluster.identities.default = $ManagedIdentity
 
-        [[[cluster-init cyclecloud/slurm:default:3.0.11]]]
-	    [[[cluster-init genomica-proj:default:1.0.0]]]
+        [[[cluster-init cyclecloud/slurm:default:3.0.7]]]
+            [[[cluster-init genomica-proj:default:1.0.0]]]
         Optional = true
 
         [[[volume boot]]]
@@ -80,7 +79,7 @@ Autoscale = $Autoscale
 
         [[[configuration cyclecloud.mounts.nfs_sched]]]
         type = $NFSSchedType
-        mountpoint = /sched        
+        mountpoint = /sched
         export_path = ${ifThenElse(NFSSchedType == "lustre", strcat("tcp:/lustrefs", NFSSchedExportPath), NFSSchedExportPath)}
         address = $NFSSchedAddress
         options = $NFSSchedMountOptions
@@ -117,7 +116,7 @@ Autoscale = $Autoscale
     #             SchedulerHostName)),
     # "-"))}
     Zone = ${ifThenElse(configuration_slurm_ha_enabled, SchedulerZone, undefined)}
-    
+
         [[[configuration]]]
         # Disable NFS mount of built-in /sched since it is a local volume mount: cyclecloud.mounts.builtinsched
         cyclecloud.mounts.nfs_sched.disabled = ${UseBuiltinSched && !configuration_slurm_ha_enabled}
@@ -125,7 +124,7 @@ Autoscale = $Autoscale
         slurm.secondary_scheduler_name = ${ifThenElse(configuration_slurm_ha_enabled, "scheduler-ha-1", undefined)}
 
 
-        [[[cluster-init cyclecloud/slurm:scheduler:3.0.11]]]
+        [[[cluster-init cyclecloud/slurm:scheduler:3.0.7]]]
 
         [[[network-interface eth0]]]
         AssociatePublicIpAddress = $UsePublicNetwork
@@ -155,7 +154,7 @@ Autoscale = $Autoscale
         fs_type = xfs
 
         [[[configuration cyclecloud.exports.builtinsched]]]
-	    disabled = ${!UseBuiltinSched || configuration_slurm_ha_enabled}
+            disabled = ${!UseBuiltinSched || configuration_slurm_ha_enabled}
         export_path = /sched
         options = no_root_squash
         samba.enabled = false
@@ -183,14 +182,17 @@ Autoscale = $Autoscale
         MachineType = $loginMachineType
         ImageName = $SchedulerImageName
         #itv
+        #SubnetId = "/subscriptions/d452ff1d-4116-4a34-bb57-4908b5535dfc/resourceGroups/azusdstirg006/providers/Microsoft.Network/virtualNetworks/azusdstivnet005/subnets/snet-login-nodes"
         SubnetId = "/subscriptions/09addf29-d567-4494-9d05-db2491ceff53/resourceGroups/azusdsnetrg/providers/Microsoft.Network/virtualNetworks/azusdshpcvnet/subnets/azusdshpcsnet"
 
-    	[[[network-interface vm-login-node-cluster1-nic2]]]
-	    #NetworkInterfaceId = ""
+        [[[network-interface vm-login-node-cluster1-nic2]]]
+            #NetworkInterfaceId = ""
         #itv
-        PrivateIp = "10.20.3.62"
+        #PrivateIp = "10.20.250.133"
+        #PrivateIp = "10.20.3.60"
+        PrivateIp = "10.20.3.58"
 
-        [[[cluster-init cyclecloud/slurm:login:3.0.11]]]
+        [[[cluster-init cyclecloud/slurm:login:3.0.7]]]
         [[[configuration]]]
         autoscale.enabled = false
         slurm.node_prefix = ${ifThenElse(NodeNamePrefix=="Cluster Prefix", StrJoin("-", ClusterName, ""), NodeNamePrefix)}
@@ -204,12 +206,13 @@ Autoscale = $Autoscale
         slurm.node_prefix = ${ifThenElse(NodeNamePrefix=="Cluster Prefix", StrJoin("-", ClusterName, ""), NodeNamePrefix)}
         slurm.use_nodename_as_hostname = $NodeNameIsHostname
 
-        [[[cluster-init cyclecloud/slurm:execute:3.0.11]]]
+        [[[cluster-init cyclecloud/slurm:execute:3.0.7]]]
 
         [[[network-interface eth0]]]
         AssociatePublicIpAddress = $ExecuteNodesPublic
 
     #low_gen
+    #itv
     [[nodearray low_gen]]
     Extends = nodearraybase
     MachineType = $low_genMachineType
@@ -226,6 +229,7 @@ Autoscale = $Autoscale
         slurm.partition = low_gen
 
     #medium_gen
+    #itv
     [[nodearray medium_gen]]
     Extends = nodearraybase
     MachineType = $medium_genMachineType
@@ -239,9 +243,10 @@ Autoscale = $Autoscale
         [[[configuration]]]
         slurm.default_partition = false
         slurm.hpc = false
-        slurm.partition = medium_gen        
-        
+        slurm.partition = medium_gen
+
     #high_gen
+    #itv
     [[nodearray high_gen]]
     Extends = nodearraybase
     MachineType = $high_genMachineType
@@ -256,8 +261,9 @@ Autoscale = $Autoscale
         slurm.default_partition = false
         slurm.hpc = false
         slurm.partition = high_gen
-
+        
     #ultra_gen
+    #itv
     [[nodearray ultra_gen]]
     Extends = nodearraybase
     MachineType = $ultra_genMachineType
@@ -271,7 +277,7 @@ Autoscale = $Autoscale
         [[[configuration]]]
         slurm.default_partition = false
         slurm.hpc = false
-        slurm.partition = ultra_gen  
+        slurm.partition = ultra_gen
 
     [[nodearray hpc]]
     Extends = nodearraybase
@@ -333,7 +339,7 @@ Order = 1
 [parameters Required Settings]
 Order = 10
 
-    
+
     [[parameters Virtual Machines ]]
     Description = "The cluster, in this case, has two roles: the scheduler node with shared filer and the execute hosts. Configure which VM types to use based on the requirements of your application."
     Order = 20
@@ -347,49 +353,47 @@ Order = 10
         Label = Scheduler VM Type
         Description = The VM type for scheduler node
         ParameterType = Cloud.MachineType
+        #itv
         DefaultValue = Standard_D4ads_v5
 
         [[[parameter loginMachineType]]]
         Label = Login node VM Type
         Description = The VM type for login nodes.
         ParameterType = Cloud.MachineType
-        DefaultValue = Standard_D2ads_v5
+        #itv
+        DefaultValue = Standard_D4ads_v5
 
         #low_gen
         [[[parameter low_genMachineType]]]
         Label = low_gen VM Type
         Description = The VM type for low_gen execute nodes
         ParameterType = Cloud.MachineType
-        DefaultValue = Standard_FX4mds
         #itv
-        #DefaultValue = Standard_E64as_v5
+        DefaultValue = Standard_F32s_v2
 
         #medium_gen
         [[[parameter medium_genMachineType]]]
         Label = medium_gen VM Type
         Description = The VM type for medium_gen execute nodes
         ParameterType = Cloud.MachineType
-        DefaultValue = Standard_FX4mds
         #itv
-        #DefaultValue = Standard_E64as_v5
+        DefaultValue = Standard_F64s_v2
 
         #high_gen
         [[[parameter high_genMachineType]]]
         Label = high_gen VM Type
         Description = The VM type for high_gen execute nodes
         ParameterType = Cloud.MachineType
-        DefaultValue = Standard_FX4mds
         #itv
-        #DefaultValue = Standard_E64as_v5
+        DefaultValue = Standard_E64as_v5
 
         #ultra_gen
         [[[parameter ultra_genMachineType]]]
         Label = ultra_gen VM Type
         Description = The VM type for ultra_gen execute nodes
         ParameterType = Cloud.MachineType
-        DefaultValue = Standard_FX4mds
         #itv
-        #DefaultValue = Standard_E64as_v5        
+        DefaultValue = Standard_M64s_v2
 
 
         [[[parameter HPCMachineType]]]
@@ -426,7 +430,7 @@ Order = 10
         [[[parameter Maxlow_genExecuteCoreCount]]]
         Label = Max low_gen Cores
         Description = The total number of low_gen execute cores to start
-        DefaultValue = 100
+        DefaultValue = 128
         Config.Plugin = pico.form.NumberTextBox
         Config.MinValue = 1
         Config.IntegerOnly = true
@@ -435,33 +439,33 @@ Order = 10
         [[[parameter Maxmedium_genExecuteCoreCount]]]
         Label = Max medium_gen Cores
         Description = The total number of medium_gen execute cores to start
-        DefaultValue = 100
+        DefaultValue = 128
         Config.Plugin = pico.form.NumberTextBox
         Config.MinValue = 1
-        Config.IntegerOnly = true        
+        Config.IntegerOnly = true
 
         #high_gen
         [[[parameter Maxhigh_genExecuteCoreCount]]]
         Label = Max high_gen Cores
         Description = The total number of high_gen execute cores to start
-        DefaultValue = 100
+        DefaultValue = 128
         Config.Plugin = pico.form.NumberTextBox
         Config.MinValue = 1
-        Config.IntegerOnly = true    
+        Config.IntegerOnly = true
 
         #ultra_gen
         [[[parameter Maxultra_genExecuteCoreCount]]]
         Label = Max ultra_gen Cores
         Description = The total number of ultra_gen execute cores to start
-        DefaultValue = 100
+        DefaultValue = 128
         Config.Plugin = pico.form.NumberTextBox
         Config.MinValue = 1
-        Config.IntegerOnly = true            
+        Config.IntegerOnly = true
 
         [[[parameter MaxHPCExecuteCoreCount]]]
         Label = Max HPC Cores
         Description = The total number of HPC execute cores to start
-        DefaultValue = 100
+        DefaultValue = 128
         Config.Plugin = pico.form.NumberTextBox
         Config.MinValue = 1
         Config.IntegerOnly = true
@@ -469,7 +473,7 @@ Order = 10
         [[[parameter MaxHTCExecuteCoreCount]]]
         Label = Max HTC Cores
         Description = The total number of HTC execute cores to start
-        DefaultValue = 100
+        DefaultValue = 128
         Config.Plugin = pico.form.NumberTextBox
         Config.MinValue = 1
         Config.IntegerOnly = true
@@ -477,14 +481,14 @@ Order = 10
         [[[parameter MaxDynamicExecuteCoreCount]]]
         Label = Max Dyn Cores
         Description = The total number of Dynamic execute cores to start
-        DefaultValue = 100
+        DefaultValue = 128
         Config.Plugin = pico.form.NumberTextBox
         Config.MinValue = 1
         Config.IntegerOnly = true
 
         #low_gen
         [[[parameter low_genMaxScalesetSize]]]
-        Label = Max VMs per VMSS
+        Label = low_gen Max VMs per VMSS
         Description = The maximum number of VMs created per VM Scaleset e.g. switch in Slurm.
         DefaultValue = 100
         Config.Plugin = pico.form.NumberTextBox
@@ -493,33 +497,33 @@ Order = 10
 
         #medium_gen
         [[[parameter medium_genMaxScalesetSize]]]
-        Label = Max VMs per VMSS
+        Label = medium_gen Max VMs per VMSS
         Description = The maximum number of VMs created per VM Scaleset e.g. switch in Slurm.
         DefaultValue = 100
         Config.Plugin = pico.form.NumberTextBox
         Config.MinValue = 1
-        Config.IntegerOnly = true        
+        Config.IntegerOnly = true
 
         #high_gen
         [[[parameter high_genMaxScalesetSize]]]
-        Label = Max VMs per VMSS
+        Label = high_gen Max VMs per VMSS
         Description = The maximum number of VMs created per VM Scaleset e.g. switch in Slurm.
         DefaultValue = 100
         Config.Plugin = pico.form.NumberTextBox
         Config.MinValue = 1
-        Config.IntegerOnly = true    
+        Config.IntegerOnly = true
 
         #ultra_gen
         [[[parameter ultra_genMaxScalesetSize]]]
-        Label = Max VMs per VMSS
+        Label = ultra_gen Max VMs per VMSS
         Description = The maximum number of VMs created per VM Scaleset e.g. switch in Slurm.
         DefaultValue = 100
         Config.Plugin = pico.form.NumberTextBox
         Config.MinValue = 1
-        Config.IntegerOnly = true              
+        Config.IntegerOnly = true
 
         [[[parameter HPCMaxScalesetSize]]]
-        Label = Max VMs per VMSS
+        Label = HPC Max VMs per VMSS
         Description = The maximum number of VMs created per VM Scaleset e.g. switch in Slurm.
         DefaultValue = 100
         Config.Plugin = pico.form.NumberTextBox
@@ -573,6 +577,7 @@ Order = 10
         ParameterType = Azure.Subnet
         Required = True
         #itv
+        #DefaultValue = "azusdstirg006/azusdstivnet005/snet-compute"
         DefaultValue = "azusdsnetrg/azusdshpcvnet/azusdshpcsnet003"
 
     [[parameters High Availability]]
@@ -596,10 +601,10 @@ Order = 15
         Config.Plugin = pico.widget.HtmlTemplateWidget
         Config.Template = '''<p>The directories <code>/sched</code> and <code>/shared</code> are network attached mounts and exist on all nodes of the cluster.<br>
             <br>
-            Options for providing these mounts:<br> 
-            <strong>[Builtin]</strong>: The scheduler node is an NFS server that provides the mountpoint to the other nodes of the cluster (not supported for HA configurations).<br> 
+            Options for providing these mounts:<br>
+            <strong>[Builtin]</strong>: The scheduler node is an NFS server that provides the mountpoint to the other nodes of the cluster (not supported for HA configurations).<br>
             <strong>[External NFS]</strong>: A network attached storage such as Azure Netapp Files, HPC Cache, or another VM running an NFS server provides the mountpoint.<br>
-            <strong>[Azure Managed Lustre]</strong>: An Azure Managed Lustre deployment provides the mountpoint.<br>        
+            <strong>[Azure Managed Lustre]</strong>: An Azure Managed Lustre deployment provides the mountpoint.<br>
         </p>
         <p>
         Note: the cluster must be terminated for changes to filesystem mounts to take effect.
@@ -609,7 +614,7 @@ Order = 15
     [[parameters Scheduler Mount]]
     Order = 20
     Label = File-system Mount for /sched
-    
+
         [[[parameter About sched]]]
         HideLabel = true
         Config.Plugin = pico.widget.HtmlTemplateWidget
@@ -637,7 +642,7 @@ Order = 15
         Config.Template := "<p><b>Warning</b>: switching an active cluster over to NFS or Lustre from Builtin will delete the shared disk.</p>"
         Conditions.Hidden := UseBuiltinSched || configuration_slurm_ha_enabled
 
-        [[[parameter NFSSchedType]]]        
+        [[[parameter NFSSchedType]]]
         Label = FS Type
         ParameterType = StringList
         Config.Label = Type of shared filesystem to use for this cluster
@@ -660,7 +665,7 @@ Order = 15
 
         [[[parameter NFSSchedMountOptions]]]
         Label = Mount Options
-        Description = NFS Client Mount Options        
+        Description = NFS Client Mount Options
         Conditions.Hidden := UseBuiltinSched && !configuration_slurm_ha_enabled
 
 
@@ -707,7 +712,7 @@ Order = 15
         Config.Template := "<p><b>Warning</b>: switching an active cluster over to NFS or Lustre from Builtin will delete the shared disk.</p>"
         Conditions.Hidden := UseBuiltinShared || configuration_slurm_ha_enabled
 
-        [[[parameter NFSType]]]        
+        [[[parameter NFSType]]]
         Label = FS Type
         ParameterType = StringList
         Config.Label = Type of shared filesystem to use for this cluster
@@ -730,7 +735,7 @@ Order = 15
 
         [[[parameter NFSSharedMountOptions]]]
         Label = Mount Options
-        Description = NFS Client Mount Options        
+        Description = NFS Client Mount Options
         Conditions.Hidden := UseBuiltinShared && !configuration_slurm_ha_enabled
 
 
@@ -760,7 +765,7 @@ Order = 15
         Widget.Plugin = pico.form.BooleanCheckBox
         Widget.Label = Add Shared Filesystem mount
 
-        [[[parameter AdditionalNFSType1]]]        
+        [[[parameter AdditionalNFSType1]]]
         Label = FS Type
         ParameterType = StringList
         Config.Label = Shared filesystem type of the additional mount
@@ -770,10 +775,11 @@ Order = 15
         Conditions.Excluded := AdditionalNFS1 isnt true
 
         [[[parameter AdditionalNFSAddress1]]]
-        Label = IP Address 
+        Label = IP Address
         Description = The IP address or hostname of the additional mount. Also accepts a list comma-separated addresses, for example, to mount a frontend load-balanced Azure HPC Cache.
         Config.ParameterType = String
         #itv
+        #DefaultValue = "10.20.250.196"
         DefaultValue = "10.20.3.132"
         Conditions.Excluded := AdditionalNFS1 isnt true
 
@@ -786,9 +792,10 @@ Order = 15
         [[[parameter AdditionalNFSExportPath1]]]
         Label = Export Path
         Description = The path exported by the file system
-        #itv        
+        #itv
+        #DefaultValue = "/azusdstivol002"
         DefaultValue = "/azusdshpcvol002"
-        
+
         Conditions.Excluded := AdditionalNFS1 isnt true
 
         [[[parameter AdditionalNFSMountOptions1]]]
@@ -803,7 +810,7 @@ Order = 15
         Widget.Plugin = pico.form.BooleanCheckBox
         Widget.Label = Add Shared Filesystem mount
 
-        [[[parameter AdditionalNFSType2]]]        
+        [[[parameter AdditionalNFSType2]]]
         Label = FS Type
         ParameterType = StringList
         Config.Label = Shared filesystem type of the additional mount
@@ -813,7 +820,7 @@ Order = 15
         Conditions.Excluded := AdditionalNFS2 isnt true
 
         [[[parameter AdditionalNFSAddress2]]]
-        Label = IP Address 
+        Label = IP Address
         Description = The IP address or hostname of the additional mount. Also accepts a list comma-separated addresses, for example, to mount a frontend load-balanced Azure HPC Cache.
         Config.ParameterType = String
         Conditions.Excluded := AdditionalNFS2 isnt true
@@ -832,18 +839,19 @@ Order = 15
         Label = Mount Options
         Description = Filesystem Client Mount Options
         Conditions.Excluded := AdditionalNFS2 isnt true
-    
+
 
 [parameters Advanced Settings]
 Order = 20
 
     [[parameters Azure Settings]]
-    Order = 10 
+    Order = 10
 
         [[[parameter Credentials]]]
         Description = The credentials for the cloud provider
-        ParameterType = Cloud.Credentials        
+        ParameterType = Cloud.Credentials
         #itv
+        #DefaultValue = "Genomica - Default credentials"
         DefaultValue = "Genomics - Default credentials"
 
         [[[parameter ManagedIdentity]]]
@@ -888,16 +896,17 @@ Order = 20
         Widget.Plugin = pico.form.BooleanCheckBox
         Widget.Label = Configure Slurm job accounting
 
-	[[[parameter slurm_database_warning]]]
-	HideLabel = true
-	Config.Plugin = pico.widget.HtmlTemplateWidget
-	Conditions.Excluded := configuration_slurm_accounting_enabled isnt true
-	Config.Template := "<table role=\"presentation\"><tr><td> <b>Note: Checking this box will create persistent databases and tables in SQL DB provided. Deleting this cluster will not automatically delete those databases. User is responsible for periodically purging/archiving their slurm databases to maintain costs.</b></td></tr></table>"
+        [[[parameter slurm_database_warning]]]
+        HideLabel = true
+        Config.Plugin = pico.widget.HtmlTemplateWidget
+        Conditions.Excluded := configuration_slurm_accounting_enabled isnt true
+        Config.Template := "<table role=\"presentation\"><tr><td> <b>Note: Checking this box will create persistent databases and tables in SQL DB provided. Deleting this cluster will not automatically delete those databases. User is responsible for periodically purging/archiving their slurm databases to maintain costs.</b></td></tr></table>"
 
         [[[parameter configuration_slurm_accounting_url]]]
         Label = Slurm DBD URL
         Description = URL of the database to use for Slurm job accounting
         #itv
+        #DefaultValue = "azusdstimysql.mysql.database.azure.com"
         DefaultValue = "azusdshpcmysql.mysql.database.azure.com"
         Conditions.Excluded := configuration_slurm_accounting_enabled isnt true
 
@@ -905,7 +914,8 @@ Order = 20
         Label = Database name
         Description = Database name to store slurm accounting records
         #itv
-        DefaultValue = "genomics"        
+        #DefaultValue = "genomica"
+        DefaultValue = "genomics"
         Conditions.Excluded := configuration_slurm_accounting_enabled isnt true
 
         [[[parameter configuration_slurm_accounting_user]]]
@@ -920,7 +930,8 @@ Order = 20
         Description = Password for Slurm DBD admin
         ParameterType = Password
         #itv
-        DefaultValue = "incluir a senha"        
+        #DefaultValue = "MRjDC2FHVN9i0sgPR8i0"
+        DefaultValue = "QUJHv6zcKLaJQRrgCxUs"
         Conditions.Excluded := configuration_slurm_accounting_enabled isnt true
 
         [[[parameter configuration_slurm_accounting_certificate_url]]]
@@ -934,7 +945,7 @@ Order = 20
         DefaultValue = "https://dl.cacerts.digicert.com/DigiCertGlobalRootCA.crt.pem"
 
         [[[parameter configuration_slurm_shutdown_policy]]]
-	    Label = Shutdown Policy
+            Label = Shutdown Policy
         description = By default, autostop will Delete stopped VMS for lowest cost.  Optionally, Stop/Deallocate the VMs for faster restart instead.
         DefaultValue = Terminate
         config.plugin = pico.control.AutoCompleteDropdown
@@ -947,13 +958,13 @@ Order = 20
 
         [[[parameter EnableTerminateNotification]]]
         Label = Enable Termination notifications
-        DefaultValue = False        
+        DefaultValue = False
 
         [[[parameter additional_slurm_config]]]
         Label = Slurm Configuration
         Description = Any additional lines to add to slurm.conf
         ParameterType = Text
-	
+
         [[[parameter configuration_slurm_launch_parameters]]]
         Label = Launch Parameters
         Description = Deploy Slurm with Launch Parameters (comma delimited)
@@ -1004,9 +1015,8 @@ Order = 20
         Label = low_gen OS
         ParameterType = Cloud.Image
         Config.OS = linux
-        DefaultValue = almalinux8
         #itv
-        #DefaultValue = "/subscriptions/09addf29-d567-4494-9d05-db2491ceff53/resourceGroups/azusdshpcrg/providers/Microsoft.Compute/galleries/azusdshpcgal/images/AlmaLInux-HPC-Compute-Image/versions/1.0.0"
+        DefaultValue = "/subscriptions/09addf29-d567-4494-9d05-db2491ceff53/resourceGroups/azusdshpcrg/providers/Microsoft.Compute/galleries/azusdshpcgal/images/AlmaLinux_8.10-HPC-Gen-Image/versions/1.0.0"
         Config.Filter := Package in {"cycle.image.centos7", "cycle.image.ubuntu20", "cycle.image.ubuntu22", "cycle.image.sles15-hpc", "almalinux8"}
 
         #medium_gen
@@ -1014,9 +1024,8 @@ Order = 20
         Label = medium_gen OS
         ParameterType = Cloud.Image
         Config.OS = linux
-        DefaultValue = almalinux8
         #itv
-        #DefaultValue = "/subscriptions/09addf29-d567-4494-9d05-db2491ceff53/resourceGroups/azusdshpcrg/providers/Microsoft.Compute/galleries/azusdshpcgal/images/AlmaLInux-HPC-Compute-Image/versions/1.0.0"
+        DefaultValue = "/subscriptions/09addf29-d567-4494-9d05-db2491ceff53/resourceGroups/azusdshpcrg/providers/Microsoft.Compute/galleries/azusdshpcgal/images/AlmaLinux_8.10-HPC-Gen-Image/versions/1.0.0"
         Config.Filter := Package in {"cycle.image.centos7", "cycle.image.ubuntu20", "cycle.image.ubuntu22", "cycle.image.sles15-hpc", "almalinux8"}
 
         #high_gen
@@ -1024,9 +1033,8 @@ Order = 20
         Label = high_gen OS
         ParameterType = Cloud.Image
         Config.OS = linux
-        DefaultValue = almalinux8
         #itv
-        #DefaultValue = "/subscriptions/09addf29-d567-4494-9d05-db2491ceff53/resourceGroups/azusdshpcrg/providers/Microsoft.Compute/galleries/azusdshpcgal/images/AlmaLInux-HPC-Compute-Image/versions/1.0.0"
+        DefaultValue = "/subscriptions/09addf29-d567-4494-9d05-db2491ceff53/resourceGroups/azusdshpcrg/providers/Microsoft.Compute/galleries/azusdshpcgal/images/AlmaLinux_8.10-HPC-Gen-Image/versions/1.0.0"
         Config.Filter := Package in {"cycle.image.centos7", "cycle.image.ubuntu20", "cycle.image.ubuntu22", "cycle.image.sles15-hpc", "almalinux8"}
 
         #ultra_gen
@@ -1034,9 +1042,8 @@ Order = 20
         Label = ultra_gen OS
         ParameterType = Cloud.Image
         Config.OS = linux
-        DefaultValue = almalinux8
         #itv
-        #DefaultValue = "/subscriptions/09addf29-d567-4494-9d05-db2491ceff53/resourceGroups/azusdshpcrg/providers/Microsoft.Compute/galleries/azusdshpcgal/images/AlmaLInux-HPC-Compute-Image/versions/1.0.0"
+        DefaultValue = "/subscriptions/09addf29-d567-4494-9d05-db2491ceff53/resourceGroups/azusdshpcrg/providers/Microsoft.Compute/galleries/azusdshpcgal/images/AlmaLinux_8.10-HPC-Gen-Image/versions/1.0.0"
         Config.Filter := Package in {"cycle.image.centos7", "cycle.image.ubuntu20", "cycle.image.ubuntu22", "cycle.image.sles15-hpc", "almalinux8"}
 
 
@@ -1045,7 +1052,7 @@ Order = 20
         ParameterType = Cloud.Image
         Config.OS = linux
         #itv
-        DefaultValue = "/subscriptions/09addf29-d567-4494-9d05-db2491ceff53/resourceGroups/azusdshpcrg/providers/Microsoft.Compute/galleries/azusdshpcgal/images/AlmaLInux-HPC-Compute-Image/versions/1.0.0"
+        DefaultValue = "/subscriptions/09addf29-d567-4494-9d05-db2491ceff53/resourceGroups/azusdshpcrg/providers/Microsoft.Compute/galleries/azusdshpcgal/images/AlmaLinux_8.10-HPC-Gen-Image/versions/1.0.0"
         Config.Filter := Package in {"cycle.image.centos7", "cycle.image.ubuntu20", "cycle.image.ubuntu22", "cycle.image.sles15-hpc", "almalinux8"}
 
         [[[parameter HTCImageName]]]
@@ -1053,7 +1060,7 @@ Order = 20
         ParameterType = Cloud.Image
         Config.OS = linux
         #itv
-        DefaultValue = "/subscriptions/09addf29-d567-4494-9d05-db2491ceff53/resourceGroups/azusdshpcrg/providers/Microsoft.Compute/galleries/azusdshpcgal/images/AlmaLInux-HPC-Compute-Image/versions/1.0.0"
+        DefaultValue = "/subscriptions/09addf29-d567-4494-9d05-db2491ceff53/resourceGroups/azusdshpcrg/providers/Microsoft.Compute/galleries/azusdshpcgal/images/AlmaLinux_8.10-HPC-Gen-Image/versions/1.0.0"
         Config.Filter := Package in {"cycle.image.centos7", "cycle.image.ubuntu20", "cycle.image.ubuntu22", "cycle.image.sles15-hpc", "almalinux8"}
 
         [[[parameter DynamicImageName]]]
@@ -1061,7 +1068,7 @@ Order = 20
         ParameterType = Cloud.Image
         Config.OS = linux
         #itv
-        DefaultValue = "/subscriptions/09addf29-d567-4494-9d05-db2491ceff53/resourceGroups/azusdshpcrg/providers/Microsoft.Compute/galleries/azusdshpcgal/images/AlmaLInux-HPC-Compute-Image/versions/1.0.0"        
+        DefaultValue = "/subscriptions/09addf29-d567-4494-9d05-db2491ceff53/resourceGroups/azusdshpcrg/providers/Microsoft.Compute/galleries/azusdshpcgal/images/AlmaLinux_8.10-HPC-Gen-Image/versions/1.0.0"
         Config.Filter := Package in {"cycle.image.centos7", "cycle.image.ubuntu20", "cycle.image.ubuntu22", "cycle.image.sles15-hpc", "almalinux8"}
 
         [[[parameter SchedulerClusterInitSpecs]]]
@@ -1069,7 +1076,7 @@ Order = 20
         DefaultValue = =undefined
         Description = Cluster init specs to apply to the scheduler node
         ParameterType = Cloud.ClusterInitSpecs
-    
+
         [[[parameter HTCClusterInitSpecs]]]
         Label = HTC Cluster-Init
         DefaultValue = =undefined
@@ -1077,6 +1084,7 @@ Order = 20
         ParameterType = Cloud.ClusterInitSpecs
 
         #low_gen
+        #itv
         [[[parameter low_genClusterInitSpecs]]]
         Label = low_gen Cluster-Init
         DefaultValue = =undefined
@@ -1084,27 +1092,30 @@ Order = 20
         ParameterType = Cloud.ClusterInitSpecs
 
         #medium_gen
+        #itv
         [[[parameter medium_genClusterInitSpecs]]]
         Label = medium_gen Cluster-Init
         DefaultValue = =undefined
         Description = Cluster init specs to apply to medium_gen execute nodes
-        ParameterType = Cloud.ClusterInitSpecs        
+        ParameterType = Cloud.ClusterInitSpecs
 
         #high_gen
+        #itv
         [[[parameter high_genClusterInitSpecs]]]
         Label = high_gen Cluster-Init
         DefaultValue = =undefined
         Description = Cluster init specs to apply to high_gen execute nodes
-        ParameterType = Cloud.ClusterInitSpecs      
+        ParameterType = Cloud.ClusterInitSpecs
 
         #ultra_gen
+        #itv
         [[[parameter ultra_genClusterInitSpecs]]]
         Label = ultra_gen Cluster-Init
         DefaultValue = =undefined
         Description = Cluster init specs to apply to ultra_gen execute nodes
-        ParameterType = Cloud.ClusterInitSpecs  
+        ParameterType = Cloud.ClusterInitSpecs
 
-        
+
         [[[parameter HPCClusterInitSpecs]]]
         Label = HPC Cluster-Init
         DefaultValue = =undefined
@@ -1122,7 +1133,7 @@ Order = 20
         Description = Disable packages from packages.microsoft.com
         ParameterType = Boolean
         DefaultValue = false
-	
+
 
     [[parameters Advanced Networking]]
 
